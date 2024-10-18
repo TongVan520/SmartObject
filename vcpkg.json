@@ -1,0 +1,9 @@
+{
+  "name" : "smartobject",
+  "version-string" : "1.0.0",
+  "builtin-baseline" : "b171feebd4f8b7943b56356f9ec1d4dbe44ab82f",
+  "dependencies" : [ {
+    "name" : "palsigslot",
+    "version>=" : "1.2.2"
+  } ]
+}
