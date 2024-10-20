@@ -8,7 +8,6 @@ find_package(PalSigslot CONFIG REQUIRED)
 add_executable(SmartObject main.cpp
         SmartObject/SmartObject.cpp
         SmartObject/SmartObject.h
-        SmartObject/SmartPointer.cpp
         SmartObject/SmartPointer.h
 )
 

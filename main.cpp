@@ -166,12 +166,6 @@ void testEmptyChange() {
 	}
 }
 
-#define MyException(errorStr) runtime_error( \
-    (string)"日期 / 时间：" + __DATE__ + " / " + __TIME__ + \
-    "\n文件：" + __FILE__ + "\t行：" + to_string(__LINE__) + \
-    "\n函数：" + __FUNCTION__ + "\n错误信息：" + errorStr \
-)
-
 int main() {
 	cout << "Hello World!" << endl;
 
@@ -179,12 +173,23 @@ int main() {
 //	testEmptyPointer();
 //	testNormalStar();
 //	testEmptyStar();
-
+//
 //	testNormalChange();
 //	testEmptyChange();
 
 //	throw runtime_error("Test Exception");
-	throw MyException("Test Exception");
+//	throw SmartException("Test Exception");
+	
+	cout << "sizeof(sigslot::signal<>) == " << sizeof(sigslot::signal<>) << endl;
+	cout << endl;
+	cout << "sizeof(SmartObject) == " << sizeof(SmartObject) << endl;
+	cout << endl;
+	cout << "sizeof(string) == " << sizeof(string) << endl;
+	cout << "sizeof(size_t) == " << sizeof(size_t) << endl;
+	cout << "sizeof(Student) == " << sizeof(Student) << endl;
+	cout << endl;
+	cout << "sizeof(Student*) == " << sizeof(Student*) << endl;
+	cout << "sizeof(SmartPointer<Student>) == " << sizeof(SmartPointer<Student>) << endl;
 	
 	return 0;
 }
