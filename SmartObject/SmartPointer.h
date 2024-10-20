@@ -32,9 +32,9 @@ namespace fireflower {
 		
 		virtual ~SmartPointer() = default;
 		
-		virtual void operator=(T* new_p_object);
+		virtual SmartPointer<T>& operator=(T* new_p_object);
 		
-		inline bool isNull() const;
+		[[nodiscard]] inline bool isNull() const;
 		
 		inline T& operator*() const;
 		
@@ -57,7 +57,7 @@ namespace fireflower {
 	}
 	
 	template<BaseOfSmartObject T>
-	void SmartPointer<T>::operator=(T* new_p_object) {
+	SmartPointer<T>& SmartPointer<T>::operator=(T* new_p_object) {
 		if (not this->isNull()) {
 			this->unbindObject(*this->p_object);
 		}
@@ -66,6 +66,8 @@ namespace fireflower {
 		if (not this->isNull()) {
 			this->bindObject(*this->p_object);
 		}
+		
+		return *this;
 	}
 	
 	template<BaseOfSmartObject T>
