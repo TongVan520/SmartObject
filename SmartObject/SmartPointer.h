@@ -50,15 +50,19 @@ namespace fireflower {
 		
 		SmartPointer(SmartPointer&& other) = default;
 		
-		virtual ~SmartPointer() = default;
-		
 		virtual SmartPointer<T>& operator=(T* new_p_object);
 		
-		[[nodiscard]] inline bool isNull() const;
+		virtual ~SmartPointer() = default;
 		
 		inline T& operator*() const;
 		
 		inline T* operator->() const;
+		
+		/// @名称 是否为空
+		/// @返回值 若所指向的对象已失效，则返回<code>true</code>，否则返回<code>false</code>
+		[[nodiscard]] inline bool isNull() const;
+		
+		inline operator bool() const;
 	};
 	
 	template<BaseOfSmartObject T>
@@ -71,6 +75,15 @@ namespace fireflower {
 	template<BaseOfSmartObject T>
 	SmartPointer<T>::SmartPointer(const SmartPointer& other) : SmartPointer(other.p_object) {
 	
+	}
+	
+	template<BaseOfSmartObject T>
+	SmartPointer<T>& SmartPointer<T>::operator=(T* new_p_object) {
+		this->unbindObject();
+		if (new_p_object) {
+			this->bindObject(*new_p_object);
+		}
+		return *this;
 	}
 	
 	template<BaseOfSmartObject T>
@@ -91,15 +104,6 @@ namespace fireflower {
 	}
 	
 	template<BaseOfSmartObject T>
-	SmartPointer<T>& SmartPointer<T>::operator=(T* new_p_object) {
-		this->unbindObject();
-		if (new_p_object) {
-			this->bindObject(*new_p_object);
-		}
-		return *this;
-	}
-	
-	template<BaseOfSmartObject T>
 	T* SmartPointer<T>::operator->() const {
 		std::lock_guard<std::mutex> locker(this->mtx);
 		return this->p_object;
@@ -117,6 +121,12 @@ namespace fireflower {
 	bool SmartPointer<T>::isNull() const {
 		std::lock_guard<std::mutex> locker(this->mtx);
 		return not this->p_object;
+	}
+	
+	template<BaseOfSmartObject T>
+	SmartPointer<T>::operator bool() const {
+		std::lock_guard<std::mutex> locker(this->mtx);
+		return this->p_object;
 	}
 	
 	template<BaseOfSmartObject T>
