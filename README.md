@@ -39,3 +39,9 @@ TODO 待提供示例代码...
 由于`sigslot`提供的功能是线程安全的，因此只需要保证`SmartPointer`中修改原始指针的代码是线程安全的即可。  
 
 只需用一个`互斥锁`保护`原始指针`即可。
+
+# 待解决问题
+|#|问题|描述|
+|:-:|:-:|:-|
+|1|内存泄漏|由于`SmartPointer`本身不存储数据，所以暂时无法防止内存泄漏。这个问题也许可以在`SmartObject`上做文章。|
+|2|基本类型|目前为止`SmartPointer`仅支持继承自`SmartObject`的类。由于`SmartPointer`的功能依赖于`SmartObject`，可以考虑引入一个继承自`SmartObject`的模板类。|
