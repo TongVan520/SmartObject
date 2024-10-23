@@ -8,7 +8,8 @@
 #include <type_traits>
 #include <exception>
 #include "SmartObject.h"
-#include <mutex>
+// #include <mutex>
+#include <shared_mutex>
 
 namespace fireflower {
 
@@ -27,7 +28,11 @@ namespace fireflower {
 		
 		/// @名称 互斥锁
 		/// @描述 用于保障多线程中原始指针的状态
-		mutable std::mutex mtx;
+		// mutable std::mutex mtx;
+		
+		/// @名称 读写锁
+		/// @描述 用于<b>高效</b>保障多线程中原始指针的状态
+		mutable std::shared_mutex shrd_mtx;
 	
 	private:
 		virtual void onDestructed();
@@ -59,6 +64,7 @@ namespace fireflower {
 		inline T* operator->() const;
 		
 		/// @名称 是否为空
+		/// @描述 线程安全，原子操作
 		/// @返回值 若所指向的对象已失效，则返回<code>true</code>，否则返回<code>false</code>
 		[[nodiscard]] inline bool isNull() const;
 		
@@ -88,14 +94,14 @@ namespace fireflower {
 	
 	template<BaseOfSmartObject T>
 	void SmartPointer<T>::bindObject(T& object) {
-		std::lock_guard<std::mutex> locker(this->mtx);
+		std::unique_lock<std::shared_mutex> write_locker(this->shrd_mtx);
 		this->p_object = &object;
 		this->p_object->destructed.connect(&SmartPointer<T>::onDestructed, this);
 	}
 	
 	template<BaseOfSmartObject T>
 	void SmartPointer<T>::unbindObject() {
-		std::lock_guard<std::mutex> locker(this->mtx);
+		std::unique_lock<std::shared_mutex> write_locker(this->shrd_mtx);
 		if (not this->p_object) {
 			return;
 		}
@@ -105,33 +111,33 @@ namespace fireflower {
 	
 	template<BaseOfSmartObject T>
 	T* SmartPointer<T>::operator->() const {
-		std::lock_guard<std::mutex> locker(this->mtx);
+		std::shared_lock<std::shared_mutex> read_locker(this->shrd_mtx);
 		return this->p_object;
 	}
 	
 	template<BaseOfSmartObject T>
 	T& SmartPointer<T>::operator*() const {
 		//保证操作的原子性
-		std::lock_guard<std::mutex> locker(this->mtx);
+		std::shared_lock<std::shared_mutex> read_locker(this->shrd_mtx);
 		this->p_object != nullptr ?: throw SmartException("指针无效...");
 		return *(this->p_object);
 	}
 	
 	template<BaseOfSmartObject T>
 	bool SmartPointer<T>::isNull() const {
-		std::lock_guard<std::mutex> locker(this->mtx);
+		std::shared_lock<std::shared_mutex> read_locker(this->shrd_mtx);
 		return not this->p_object;
 	}
 	
 	template<BaseOfSmartObject T>
 	SmartPointer<T>::operator bool() const {
-		std::lock_guard<std::mutex> locker(this->mtx);
+		std::shared_lock<std::shared_mutex> read_locker(this->shrd_mtx);
 		return this->p_object;
 	}
 	
 	template<BaseOfSmartObject T>
 	void SmartPointer<T>::onDestructed() {
-		std::lock_guard<std::mutex> locker(this->mtx);
+		std::unique_lock<std::shared_mutex> write_locker(this->shrd_mtx);
 		this->p_object = nullptr;
 	}
 }

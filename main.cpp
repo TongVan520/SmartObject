@@ -176,8 +176,8 @@ namespace test {
 				// ==========================↓在以下区域delete则抛异常↓==========================
 				cout << "======子线程======" << endl;
 				// 由于Student类线程不安全，所以无法保证其对象操作的原子性
-//				cout << "姓名：" << p_student->getName() << endl;
-//				cout << "年龄：" << p_student->getAge() << endl;
+				// cout << "姓名：" << p_student->getName() << endl;
+				// cout << "年龄：" << p_student->getAge() << endl;
 				
 				// 有概率抛异常，情况为：子线程在while判断后，打印student信息前，主线程delete
 				try {
@@ -221,7 +221,11 @@ void showSize() {
 	cout << "sizeof(size_t) == " << sizeof(size_t) << endl;
 	cout << "sizeof(Student) == " << sizeof(Student) << endl;
 	cout << endl;
+	cout << "======指针大小比较======" << endl;
 	cout << "sizeof(Student*) == " << sizeof(Student*) << endl;
+	cout << "sizeof(unique_ptr<Student>) == " << sizeof(unique_ptr<Student>) << endl;
+	cout << "sizeof(shared_ptr<Student>) == " << sizeof(shared_ptr<Student>) << endl;
+	cout << "sizeof(weak_ptr<Student>) == " << sizeof(weak_ptr<Student>) << endl;
 	cout << "sizeof(SmartPointer<Student>) == " << sizeof(SmartPointer<Student>) << endl;
 }
 
@@ -241,5 +245,8 @@ int main() {
 	// throw SmartException("Test Exception");
 	
 	multithread::main();
+	
+	// showSize();
+	
 	return 0;
 }
