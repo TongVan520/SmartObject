@@ -9,6 +9,7 @@ add_executable(SmartObject main.cpp
         SmartObject/SmartObject.cpp
         SmartObject/SmartObject.h
         SmartObject/SmartPointer.h
+        SmartObject/SmartDefine.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Pal::Sigslot)

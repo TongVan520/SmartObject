@@ -210,6 +210,62 @@ namespace test {
 			cout << "多线程测试结束" << endl;
 		}
 	}
+	
+	namespace wrapper {
+		void testNormalWrapper() {
+			using namespace fireflower;
+			
+			int normal_number = 114;
+			SmartWrapper<int> number = 0;
+			cout << number << endl;
+			
+			number = 10;
+			normal_number = number;
+			number = normal_number;
+			
+			for (SmartWrapper<int> i = 0; i < number; i++) {
+				cout << i << endl;
+			}
+			
+			string textStr = "114514";
+			SmartWrapper<string> textStrWrp = "1919810";
+			
+			textStrWrp = textStr;
+			cout << static_cast<string>(textStrWrp) << endl;
+			// textStr = textStrWrp;
+			// cout << textStr << endl;
+			
+			// 思维栈：智能包装器的实现 -> 隐式类型转换规则 -> 值类别
+			
+			class Test {
+			public:
+				int n;
+				
+			public:
+				Test() = default;
+				
+				Test(const Test&) = default;
+				
+				Test(Test&&) = default;
+				
+				Test& operator=(const Test&) = default;
+				
+				Test& operator=(Test&&) = default;
+			};
+			
+			SmartWrapper<Test> t1, t2;
+			// t1 = std::move(t2);
+			// t1.operator=(std::move(t2));
+			t1 = std::move(t2);
+			// t1.n;
+			
+			SmartWrapper<string> str = "114514";
+			auto ptr = make_smart(str);
+			SmartPointer<SmartWrapper<string>> pointer = &str;
+			cout << pointer << endl;
+			cout << str.getPrimordialReference() << endl;
+		}
+	}
 }
 
 void showSize() {
@@ -244,7 +300,9 @@ int main() {
 	// throw runtime_error("Test Exception");
 	// throw SmartException("Test Exception");
 	
-	multithread::main();
+	// multithread::main();
+	
+	wrapper::testNormalWrapper();
 	
 	// showSize();
 	

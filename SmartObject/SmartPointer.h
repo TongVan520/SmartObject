@@ -5,30 +5,18 @@
 #ifndef SMARTOBJECT_SMARTPOINTER_H
 #define SMARTOBJECT_SMARTPOINTER_H
 
-#include <type_traits>
 #include <exception>
 #include "SmartObject.h"
-// #include <mutex>
 #include <shared_mutex>
+#include "SmartDefine.h"
 
 namespace fireflower {
-
-#define SmartException(errorStr) std::runtime_error( \
-    (std::string)"日期 / 时间：" + __DATE__ + " / " + __TIME__ + \
-    "\n文件：" + __FILE__ + "\t行：" + std::to_string(__LINE__) + \
-    "\n函数：" + __FUNCTION__ + "\n错误信息：" + errorStr \
-)
-	
 	///智能指针
 	template<BaseOfSmartObject T>
 	class SmartPointer {
 	private:
 		/// @名称 对象的原始指针
 		T* p_object = nullptr;
-		
-		/// @名称 互斥锁
-		/// @描述 用于保障多线程中原始指针的状态
-		// mutable std::mutex mtx;
 		
 		/// @名称 读写锁
 		/// @描述 用于<b>高效</b>保障多线程中原始指针的状态
@@ -62,6 +50,10 @@ namespace fireflower {
 		inline T& operator*() const;
 		
 		inline T* operator->() const;
+		
+		/// @名称 获取原始指针
+		/// @返回值 原始指针
+		[[nodiscard]] inline T* getPrimordialPointer() const;
 		
 		/// @名称 是否为空
 		/// @描述 线程安全，原子操作
@@ -110,17 +102,23 @@ namespace fireflower {
 	}
 	
 	template<BaseOfSmartObject T>
+	T& SmartPointer<T>::operator*() const {
+		//保证操作的原子性
+		std::shared_lock<std::shared_mutex> read_locker(this->shrd_mtx);
+		this->p_object != nullptr ?: throw SmartException("指针无效...");
+		return *(this->p_object);
+	}
+	
+	template<BaseOfSmartObject T>
 	T* SmartPointer<T>::operator->() const {
 		std::shared_lock<std::shared_mutex> read_locker(this->shrd_mtx);
 		return this->p_object;
 	}
 	
 	template<BaseOfSmartObject T>
-	T& SmartPointer<T>::operator*() const {
-		//保证操作的原子性
+	T* SmartPointer<T>::getPrimordialPointer() const {
 		std::shared_lock<std::shared_mutex> read_locker(this->shrd_mtx);
-		this->p_object != nullptr ?: throw SmartException("指针无效...");
-		return *(this->p_object);
+		return this->p_object;
 	}
 	
 	template<BaseOfSmartObject T>
@@ -140,6 +138,14 @@ namespace fireflower {
 		std::unique_lock<std::shared_mutex> write_locker(this->shrd_mtx);
 		this->p_object = nullptr;
 	}
+	
+	template<BaseOfSmartObject T>
+	SmartPointer<T> makeSmart(T& object) {
+		return SmartPointer<T>(&object);
+	}
+
+#define make_smart makeSmart
+
 }
 
 #endif //SMARTOBJECT_SMARTPOINTER_H
