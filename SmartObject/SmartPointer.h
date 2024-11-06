@@ -43,7 +43,7 @@ namespace fireflower {
 		
 		SmartPointer(SmartPointer&& other) = default;
 		
-		virtual SmartPointer<T>& operator=(T* new_p_object);
+		virtual SmartPointer<T>& operator=(const SmartPointer<T>& other);
 		
 		virtual ~SmartPointer() = default;
 		
@@ -52,6 +52,7 @@ namespace fireflower {
 		inline T* operator->() const;
 		
 		/// @名称 获取原始指针
+		/// @描述 线程安全，原子操作
 		/// @返回值 原始指针
 		[[nodiscard]] inline T* getPrimordialPointer() const;
 		
@@ -60,7 +61,7 @@ namespace fireflower {
 		/// @返回值 若所指向的对象已失效，则返回<code>true</code>，否则返回<code>false</code>
 		[[nodiscard]] inline bool isNull() const;
 		
-		inline operator bool() const;
+		inline explicit operator bool() const;
 	};
 	
 	template<BaseOfSmartObject T>
@@ -76,10 +77,14 @@ namespace fireflower {
 	}
 	
 	template<BaseOfSmartObject T>
-	SmartPointer<T>& SmartPointer<T>::operator=(T* new_p_object) {
+	SmartPointer<T>& SmartPointer<T>::operator=(const SmartPointer<T>& other) {
+		if (this->getPrimordialPointer() == other.getPrimordialPointer()) {
+			return *this;
+		}
+		
 		this->unbindObject();
-		if (new_p_object) {
-			this->bindObject(*new_p_object);
+		if (std::shared_lock<std::shared_mutex> other_read_locker(other.shrd_mtx); other) {
+			this->bindObject(*other.p_object);
 		}
 		return *this;
 	}
@@ -140,8 +145,8 @@ namespace fireflower {
 	}
 	
 	template<BaseOfSmartObject T>
-	SmartPointer<T> makeSmart(T& object) {
-		return SmartPointer<T>(&object);
+	SmartPointer<T> makeSmart(T* object) {
+		return SmartPointer<T>(object);
 	}
 
 #define make_smart makeSmart

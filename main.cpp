@@ -1,6 +1,8 @@
 #include <iostream>
 #include "SmartObject/SmartPointer.h"
 #include <thread>
+#include <memory>
+#include "TypeWrapper/TypeWrapper.h"
 
 using namespace std;
 using namespace fireflower;
@@ -213,57 +215,49 @@ namespace test {
 	
 	namespace wrapper {
 		void testNormalWrapper() {
+			// 类类型
+			SmartWrapper<string> textStrWrp = "114514";
+			textStrWrp.append("1919810");
+			cout << textStrWrp << endl;        // 1145141919810
+			
+			// 非类类型
+			SmartWrapper<size_t> size = textStrWrp.size();
+			cout << "size == " << size << endl;
+			
+			for (auto& c: textStrWrp) {
+				c++;
+			}
+			cout << textStrWrp << endl;        // 2256252:2:921
+			
+			// SmartWrapper<Student> studentWrp;	// 报错，原因：不能包装继承自`SmartObject`类的类型
+		}
+		
+		void testWrapperWithPointer() {
+			SmartWrapper<string> textStrWrp = "114514";
+			auto textStrPtr = make_smart(&textStrWrp);
+			textStrPtr->append("1919810");
+			cout << *textStrPtr << endl;
+		}
+		
+		void testWrapperWithEmptyPointer() {
 			using namespace fireflower;
+			SmartPointer<SmartWrapper<string>> p;
 			
-			int normal_number = 114;
-			SmartWrapper<int> number = 0;
-			cout << number << endl;
-			
-			number = 10;
-			normal_number = number;
-			number = normal_number;
-			
-			for (SmartWrapper<int> i = 0; i < number; i++) {
-				cout << i << endl;
+			{
+				SmartWrapper<string> textStrWrp = "114514";
+				
+				p = make_smart(&textStrWrp);
+				p->append("1919810");
+				
+				cout << "*p == " << *p << endl;
 			}
 			
-			string textStr = "114514";
-			SmartWrapper<string> textStrWrp = "1919810";
-			
-			textStrWrp = textStr;
-			cout << static_cast<string>(textStrWrp) << endl;
-			// textStr = textStrWrp;
-			// cout << textStr << endl;
-			
-			// 思维栈：智能包装器的实现 -> 隐式类型转换规则 -> 值类别
-			
-			class Test {
-			public:
-				int n;
-				
-			public:
-				Test() = default;
-				
-				Test(const Test&) = default;
-				
-				Test(Test&&) = default;
-				
-				Test& operator=(const Test&) = default;
-				
-				Test& operator=(Test&&) = default;
-			};
-			
-			SmartWrapper<Test> t1, t2;
-			// t1 = std::move(t2);
-			// t1.operator=(std::move(t2));
-			t1 = std::move(t2);
-			// t1.n;
-			
-			SmartWrapper<string> str = "114514";
-			auto ptr = make_smart(str);
-			SmartPointer<SmartWrapper<string>> pointer = &str;
-			cout << pointer << endl;
-			cout << str.getPrimordialReference() << endl;
+			if (p) {
+				cout << "*p == " << *p << endl;
+			}
+			else {
+				cout << "内存已释放..." << endl;
+			}
 		}
 	}
 }
@@ -274,6 +268,7 @@ void showSize() {
 	cout << "sizeof(SmartObject) == " << sizeof(SmartObject) << endl;
 	cout << endl;
 	cout << "sizeof(string) == " << sizeof(string) << endl;
+	cout << "sizeof(SmartWrapper<string>) == " << sizeof(SmartWrapper<string>) << endl;
 	cout << "sizeof(size_t) == " << sizeof(size_t) << endl;
 	cout << "sizeof(Student) == " << sizeof(Student) << endl;
 	cout << endl;
@@ -302,7 +297,10 @@ int main() {
 	
 	// multithread::main();
 	
-	wrapper::testNormalWrapper();
+	using namespace wrapper;
+	// testNormalWrapper();
+	// testWrapperWithPointer();
+	// testWrapperWithEmptyPointer();
 	
 	// showSize();
 	
