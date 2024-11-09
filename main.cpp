@@ -227,7 +227,7 @@ namespace test {
 			for (auto& c: textStrWrp) {
 				c++;
 			}
-			cout << textStrWrp << endl;        // 2256252:2:921
+			cout << textStrWrp << endl;                // 2256252:2:921
 			
 			// SmartWrapper<Student> studentWrp;	// 报错，原因：不能包装继承自`SmartObject`类的类型
 		}
@@ -258,6 +258,62 @@ namespace test {
 			else {
 				cout << "内存已释放..." << endl;
 			}
+		}
+		
+		void testCopyMove() {
+			SmartWrapper<string> nameStr = "qwq", textStr = "114514";
+			// 移动赋值
+			nameStr = "2333";
+			cout << nameStr << endl;
+			
+			// 拷贝赋值
+			nameStr = textStr;
+			cout << nameStr << endl;
+			
+			// 移动赋值
+			nameStr = "1919810"s;
+			cout << nameStr << endl;
+			
+			SmartWrapper<size_t> size = nameStr.size();
+			size_t sz = size;
+			// 移动赋值
+			size = 0;
+			cout << size << endl;
+			
+			// 隐式转换
+			sz = size;
+			cout << sz << endl;
+			
+			// 不可继承测试类
+			class Test final {
+			public:
+				Test() = default;
+				
+				Test(const Test&) = delete;
+				
+				Test(Test&&) = delete;
+				
+				Test& operator=(const Test&) = default;
+				// Test& operator=(const Test&) = delete;
+				
+				Test& operator=(Test&&) = default;
+				// Test& operator=(Test&&) = delete;
+			};
+			
+			SmartWrapper<Test> test, test2;
+			Test t;
+			// 移动赋值
+			test.unwrap() = Test();
+			// 拷贝赋值
+			t = test.unwrap();
+			
+			// 拷贝赋值
+			test = test2;
+			test.unwrap() = test2.unwrap();
+			
+			// 移动赋值
+			test = std::move(test2);
+			test2.unwrap() = std::move(test.unwrap());
 		}
 	}
 }
@@ -297,12 +353,13 @@ int main() {
 	
 	// multithread::main();
 	
-	using namespace wrapper;
+	// using namespace wrapper;
 	// testNormalWrapper();
 	// testWrapperWithPointer();
 	// testWrapperWithEmptyPointer();
+	// testCopyMove();
 	
-	// showSize();
+	showSize();
 	
 	return 0;
 }

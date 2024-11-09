@@ -29,12 +29,20 @@ namespace fireflower {
 	
 	/// @类名 智能包装器
 	/// @描述 可将满足以下所有条件的一切类型包装成智能对象：\n
-	/// - 可构造的类型\n
-	/// - <b>不</b>继承自<code>SmartObject</code>的类型\n
+	/// - 该类型可被构造\n
+	/// - 该类型<b>不</b>继承自<code>SmartObject</code>\n
 	template<class T> requires (HasConstructor<T> and not BaseOfSmartObject<T>)
 	class SmartWrapper : public SmartObject, public TypeWrapper<T> {
 	public:
 		using TypeWrapper<T>::TypeWrapper;
+		
+		template<class R>
+		inline SmartWrapper<T>& operator=(R&& value) requires CanAssignWith<TypeWrapper<T>&, R> {
+			TypeWrapper<T>::operator=(std::forward<R>(value));
+			return *this;
+		}
+		
+		SmartWrapper<T>& operator=(const SmartWrapper<T>& other) requires false = delete;
 	};
 } // fireflower
 

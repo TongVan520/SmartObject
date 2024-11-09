@@ -27,6 +27,9 @@ namespace fireflower {
 	class TypeWrapper : public T {
 	public:
 		using T::T;
+		using T::operator=;
+		
+		TypeWrapper<T>& operator=(const TypeWrapper<T>&) requires false = delete;
 	};
 	
 	/// @名称 类型包装器的偏特化
@@ -42,6 +45,16 @@ namespace fireflower {
 		
 		}
 		
+		TypeWrapper<T>& operator=(const T& other_value) {
+			this->value = other_value;
+			return *this;
+		}
+		
+		TypeWrapper<T>& operator=(T&& other_value) {
+			this->value = std::move(other_value);
+			return *this;
+		}
+		
 		operator T&() {
 			return this->value;
 		}
@@ -54,7 +67,7 @@ namespace fireflower {
 	/// @名称 类型包装器的偏特化
 	/// @描述 可以包装任意<b>不可继承的</b>类类型
 	template<ClassTypeButFinal T>
-	class TypeWrapper<T> final {
+	class TypeWrapper<T> {
 	private:
 		T value;
 	
